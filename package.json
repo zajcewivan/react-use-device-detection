@@ -1,0 +1,33 @@
+{
+  "name": "react-use-device-detection",
+  "version": "1.0.3",
+  "description": "React hook for detecting device type and primary input",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4",
+    "react": "^18.2.0",
+    "@types/react": "^18.0.27"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "device",
+    "detection",
+    "touch",
+    "mouse"
+  ],
+  "author": "Ivan Zajcew",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zajcewivan/react-use-device-detection"
+  }
+}
