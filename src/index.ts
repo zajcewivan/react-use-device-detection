@@ -2,15 +2,49 @@ import { useEffect, useMemo, useState } from "react";
 
 export type DeviceType = "mouseOnly" | "touchOnly" | "hybrid";
 export type PrimaryInput = "mouse" | "touch";
+export type DeviceInfo = {
+  deviceType: DeviceType;
+  primaryInput: PrimaryInput;
+};
 
 function getMaxScreenWidth() {
   if (typeof window === "undefined" || !window.screen) return 0;
   return Math.max(window.screen.width, window.screen.height);
 }
 
+const detectDeviceInfo = (): DeviceInfo => {
+  const isPrimaryFine = window.matchMedia("(pointer: fine)").matches;
+  const isPrimaryHover = window.matchMedia("(hover: hover)").matches;
+  const isAnyFine = window.matchMedia("(any-pointer: fine)").matches;
+  const isAnyHover = window.matchMedia("(any-hover: hover)").matches;
+  const isAnyCoarse = window.matchMedia("(any-pointer: coarse)").matches;
+
+  let deviceType: DeviceType;
+  let primaryInput: PrimaryInput;
+
+  if (isAnyCoarse && !isAnyHover) {
+    primaryInput = "touch";
+    deviceType = "touchOnly";
+  } else if (isAnyFine && !isAnyCoarse && isAnyHover) {
+    primaryInput = "mouse";
+    deviceType = "mouseOnly";
+  } else {
+    deviceType = "hybrid";
+    primaryInput = isPrimaryFine && isPrimaryHover ? "mouse" : "touch";
+  }
+
+  return { deviceType, primaryInput };
+};
+
+const initDeviceInfoState = (): DeviceInfo => {
+  if (typeof window !== "undefined") {
+    return detectDeviceInfo();
+  }
+  return { deviceType: "mouseOnly", primaryInput: "mouse" };
+};
+
 export function useDeviceDetection(isReactive?: boolean) {
-  const [deviceType, setDeviceType] = useState<DeviceType>("mouseOnly");
-  const [primaryInput, setPrimaryInput] = useState<PrimaryInput>("mouse");
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>(initDeviceInfoState);
 
   const maxWidth = useMemo(() => getMaxScreenWidth(), []);
 
@@ -18,31 +52,9 @@ export function useDeviceDetection(isReactive?: boolean) {
     if (typeof window === "undefined") return;
 
     const updateDeviceInfo = () => {
-      const isPrimaryFine = window.matchMedia("(pointer: fine)").matches;
-      const isPrimaryHover = window.matchMedia("(hover: hover)").matches;
-      const isAnyFine = window.matchMedia("(any-pointer: fine)").matches;
-      const isAnyHover = window.matchMedia("(any-hover: hover)").matches;
-      const isAnyCoarse = window.matchMedia("(any-pointer: coarse)").matches;
-
-      let newDeviceType: DeviceType;
-      let newPrimaryInput: PrimaryInput;
-
-      if (isAnyCoarse && !isAnyHover) {
-        newPrimaryInput = "touch";
-        newDeviceType = "touchOnly";
-      } else if (isAnyFine && !isAnyCoarse && isAnyHover) {
-        newPrimaryInput = "mouse";
-        newDeviceType = "mouseOnly";
-      } else {
-        newDeviceType = "hybrid";
-        newPrimaryInput = isPrimaryFine && isPrimaryHover ? "mouse" : "touch";
-      }
-
-      setDeviceType(newDeviceType);
-      setPrimaryInput(newPrimaryInput);
+      const newDeviceInfo = detectDeviceInfo();
+      setDeviceInfo(newDeviceInfo);
     };
-
-    updateDeviceInfo();
 
     if (isReactive) {
       window.addEventListener("resize", updateDeviceInfo);
@@ -54,5 +66,9 @@ export function useDeviceDetection(isReactive?: boolean) {
     }
   }, [isReactive]);
 
-  return { deviceType, primaryInput, maxWidth };
+  return {
+    deviceType: deviceInfo.deviceType,
+    primaryInput: deviceInfo.primaryInput,
+    maxWidth,
+  };
 }

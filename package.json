@@ -1,6 +1,6 @@
 {
   "name": "react-use-device-detection",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "React hook for detecting device type and primary input",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
