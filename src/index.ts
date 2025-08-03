@@ -53,7 +53,12 @@ export function useDeviceDetection(isReactive?: boolean) {
 
     const updateDeviceInfo = () => {
       const newDeviceInfo = detectDeviceInfo();
-      setDeviceInfo(newDeviceInfo);
+      setDeviceInfo((prev) =>
+        prev.deviceType !== newDeviceInfo.deviceType ||
+        prev.primaryInput !== newDeviceInfo.primaryInput
+          ? newDeviceInfo
+          : prev
+      );
     };
 
     if (isReactive) {
